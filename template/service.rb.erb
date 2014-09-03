@@ -1,0 +1,15 @@
+class <%= module_name %>::Service < ServiceContract::Avro::Service
+  class << self
+    def data_dir
+      File.expand_path("<%= path_to_root %>/contracts", __FILE__)
+    end
+
+    def title
+      "<%= service_name %>"
+    end
+
+    def description
+      "<%= service_name %>"
+    end
+  end
+end

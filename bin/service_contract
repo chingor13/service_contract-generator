@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+$:.unshift(File.expand_path("../../lib", __FILE__))
+require 'service_contract-generator'
+
+ServiceContract::Generator::CLI.start(ARGV)
