@@ -6,8 +6,20 @@ module ServiceContract
   module Generator
     class CLI < Thor
 
-      desc "new CONTRACT_NAME", "bootstraps a new service_contract"
-      def new(contract_name)
+      desc "protocol NAMESPACE PROTOCOL_NAME VERSION", "generate a new protocol"
+      def protocol(namespace, protocol_name, version)
+        folder = File.join("contracts", version, "source")
+        FileUtils.mkdir_p(folder)
+        output_file = File.join(folder, "#{ActiveSupport::Inflector.underscore(protocol_name)}.avdl")
+        b = binding()
+        erb = ERB.new(File.read(File.expand_path("../../../../template/protocol.avdl.erb", __FILE__)))
+        File.open(output_file, 'w') do |file|
+          file.write(erb.result(b))
+        end
+      end
+
+      desc "gem CONTRACT_NAME", "bootstraps a new service_contract"
+      def gem(contract_name)
         path = contract_name.gsub("-", "/")
         module_name = ActiveSupport::Inflector.camelize(path)
 
@@ -48,22 +60,12 @@ module ServiceContract
         File.open(gemspec, "w") do |file|
           file.write(output)
         end
-        # if match = dependency_line.match(/(\d+):([^\.]+)\.add_de/)
-        #   line_number = match[1]
-        #   new_line = %{#{match[2]}.add_dependency "service_contract"}
-        #   gemspec_contents = ""
-
-        #   puts new_line
-        #   command = %{sed -i '#{line_number}i\\ #{new_line}' #{gemspec}}
-        #   puts command
-        #   # `#{command}`
-        # end
 
         # template files
         path_to_root = (Array.new(2 + module_name.split("::").length) {".."}).join("/")
         service_name = ActiveSupport::Inflector.humanize(contract_name)
         b = binding()
-        Dir.glob(File.expand_path("../../../../template/*.erb", __FILE__)).each do |template|
+        Dir.glob(File.expand_path("../../../../template/*.rb.erb", __FILE__)).each do |template|
           erb = ERB.new(File.read(template))
           output_file = File.join(contract_name, 'lib', path, File.basename(template, ".erb"))
           puts "writing template: #{output_file}"
