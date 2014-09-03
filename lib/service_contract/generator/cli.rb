@@ -12,16 +12,14 @@ module ServiceContract
         FileUtils.mkdir_p(folder)
         output_file = File.join(folder, "#{ActiveSupport::Inflector.underscore(protocol_name)}.avdl")
         b = binding()
-        erb = ERB.new(File.read(File.expand_path("../../../../template/protocol.avdl.erb", __FILE__)))
-        File.open(output_file, 'w') do |file|
-          file.write(erb.result(b))
-        end
+        write_template("protocol.avdl.erb", output_file, b)
       end
 
       desc "gem CONTRACT_NAME", "bootstraps a new service_contract"
       def gem(contract_name)
         path = contract_name.gsub("-", "/")
         module_name = ActiveSupport::Inflector.camelize(path)
+        module_names = module_name.split("::")
 
         # create directory structure
         commands = [
@@ -65,13 +63,22 @@ module ServiceContract
         path_to_root = (Array.new(2 + module_name.split("::").length) {".."}).join("/")
         service_name = ActiveSupport::Inflector.humanize(contract_name)
         b = binding()
-        Dir.glob(File.expand_path("../../../../template/*.rb.erb", __FILE__)).each do |template|
-          erb = ERB.new(File.read(template))
+        %w(documentation.rb.erb service.rb.erb).each do |template|
           output_file = File.join(contract_name, 'lib', path, File.basename(template, ".erb"))
-          puts "writing template: #{output_file}"
-          File.open(output_file, 'w') do |file|
-            file.write(erb.result(b))
-          end
+          write_template(template, output_file, b)
+        end
+
+        write_template("module.rb.erb", File.join(contract_name, "lib", "#{path}.rb"), b)
+      end
+
+      protected
+
+      def write_template(name, output_file, bind)
+        template_folder = File.expand_path("../../../../template", __FILE__)
+        input = File.join(template_folder, name)
+        erb = ERB.new(File.read(input))
+        File.open(output_file, 'w') do |file|
+          file.write(erb.result(bind))
         end
       end
 

@@ -1,0 +1,8 @@
+<% module_names.each do |name| %>
+module <%= name %> do
+<% end %>
+  autoload :Documentation, "<%= path %>/documentation"
+  autoload :Service, "<%= path %>/service"
+<% module_names.each do |name| %>
+end
+<% end %>
