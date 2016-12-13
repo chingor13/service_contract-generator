@@ -1,8 +1,10 @@
-<% module_names.each do |name| %>
-module <%= name %> do
+require 'service_contract'
+
+<% module_names.each_with_index do |name, i| %>
+<%= "  " * i %>module <%= name %>
 <% end %>
-  autoload :Documentation, "<%= path %>/documentation"
-  autoload :Service, "<%= path %>/service"
-<% module_names.each do |name| %>
-end
+<%= "  " * module_names.length %>autoload :Documentation, "<%= path %>/documentation"
+<%= "  " * module_names.length %>autoload :Service, "<%= path %>/service"
+<% module_names.each_with_index do |name, i| %>
+<%= "  " * (module_names.length - i - 1) %>end
 <% end %>
